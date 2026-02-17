@@ -1,0 +1,16 @@
+{
+    "objects": [
+        {"label": "sofa", "confidence": 0.95, "bbox": [100, 200, 400, 600]},
+        {"label": "coffee table", "confidence": 0.88, "bbox": [450, 300, 550, 500]},
+        {"label": "window", "confidence": 0.92, "bbox": [50, 50, 300, 400]}
+    ],
+    "depth_summary": {
+        "min_depth": 0.5,
+        "max_depth": 5.0,
+        "variance": 1.2
+    },
+    "brightness_metadata": {
+        "average_brightness": 85,
+        "is_dark": true
+    }
+}
