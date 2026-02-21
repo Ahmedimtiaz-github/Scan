@@ -1,19 +1,13 @@
 """
 High-level pipeline controller: wires perception -> generation -> video.
+Heavy imports deferred until run() so CI/tests can run without torch, diffusers, etc.
 """
 
 import os
 import json
 import logging
-import sys
 from datetime import datetime
 from typing import Optional
-
-from src.input import extract_frames
-from src.adapters.perception_adapter import run_perception_for_image
-from src.adapters.generation_adapter import generate_styled_frame
-from src.adapters.video_adapter import create_video_from_keyframes
-from src.video.video_maker import VideoMaker
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +56,12 @@ def run(
     orch_logger = OrchestratorLogger(os.path.join(output_dir, "run.log"))
     orch_logger.setup()
 
+    # Defer heavy imports until just before use
+    from src.input import extract_frames
+    from src.adapters.perception_adapter import run_perception_for_image
+    from src.adapters.generation_adapter import generate_styled_frame
+    from src.adapters.video_adapter import make_video_from_keyframes
+
     start_time = datetime.now()
     logger.info(f"Pipeline start | mode={mode} preset={preset} input={input_path}")
 
@@ -90,8 +90,8 @@ def run(
         step_start = datetime.now()
 
         try:
-            # Perception
-            frame_obj = run_perception_for_image(frame_path, scene_dir, preset, frame_id=frame_id)
+            # Perception (out_dir = output_dir; adapter creates frames/frame_XXXX/ and scene/)
+            frame_obj = run_perception_for_image(frame_path, output_dir, preset, frame_id=frame_id)
             frame_obj["preset"] = preset
             frame_obj["mode"] = mode
             all_frames.append(frame_obj)
@@ -128,11 +128,17 @@ def run(
     if styled_paths:
         video_path = os.path.join(output_dir, "final_video.mp4")
         try:
+            from src.video.video_maker import VideoMaker
             vm = VideoMaker(output_path=video_path, fps=24)
             vm.create_video(styled_paths, transition_frames=12, hold_frames=24)
         except Exception as e:
             logger.warning(f"VideoMaker failed, trying adapter: {e}")
-            create_video_from_keyframes(styled_paths, video_path, fps=24)
+            result = make_video_from_keyframes(styled_paths, video_path, fps=24, crossfade_frames=6)
+            if result is None:
+                placeholder_path = os.path.join(output_dir, "video_placeholder.txt")
+                with open(placeholder_path, "w") as f:
+                    f.write("Video assembly skipped (no keyframes or OpenCV failed).\n")
+                logger.warning(f"Wrote {placeholder_path}")
 
     # Optional: combined scene.json
     combined_scene_path = os.path.join(scene_dir, "scene.json")

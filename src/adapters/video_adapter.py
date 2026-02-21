@@ -10,6 +10,25 @@ import cv2
 logger = logging.getLogger(__name__)
 
 
+def make_video_from_keyframes(
+    keyframe_paths: list[str],
+    out_video_path: str,
+    fps: int = 24,
+    crossfade_frames: int = 6,
+) -> str | None:
+    """
+    Create video from styled keyframes using cross-dissolve.
+    CPU-friendly crossfade between keyframes.
+    """
+    return create_video_from_keyframes(
+        keyframe_paths,
+        out_video_path,
+        fps=fps,
+        transition_frames=crossfade_frames,
+        hold_frames=max(6, crossfade_frames * 2),
+    )
+
+
 def create_video_from_keyframes(
     keyframe_paths: list[str],
     output_path: str,

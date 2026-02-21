@@ -1,0 +1,17 @@
+# Pinned heavy dependencies for CPU-only runs
+# Install: pip install -r requirements_heavy.txt
+# Or use scripts/install_heavy_deps_cpu.ps1 (Windows) / scripts/install_heavy_deps_cpu.sh (Linux)
+
+torch>=2.0.0,<2.3.0
+torchvision>=0.15.0
+diffusers>=0.20.0,<0.30.0
+transformers>=4.30.0
+accelerate>=0.20.0
+safetensors>=0.3.0
+ultralytics>=8.0.0
+opencv-python-headless>=4.8.0
+Pillow>=9.5.0
+jsonschema>=4.0.0
+
+# segment-anything: install from GitHub
+# pip install git+https://github.com/facebookresearch/segment-anything.git

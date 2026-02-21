@@ -2,9 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [main, feature/integration-glue]
+    branches: [main, feature/integration-glue, feature/integration-finish]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -27,3 +28,31 @@ jobs:
         run: python -m pytest -q -v --basetemp=./tests/pytest_tmp
         env:
           RUN_HEAVY: ""
+
+  heavy-demo:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install heavy deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install diffusers transformers accelerate safetensors ultralytics opencv-python-headless pillow jsonschema
+          pip install -r requirements.txt
+
+      - name: Create sample image
+        run: |
+          python -c "from PIL import Image; import os; os.makedirs('sample_data', exist_ok=True); Image.new('RGB', (512, 512), (128,128,128)).save('sample_data/sample.jpg')"
+
+      - name: Run pipeline
+        run: python -m src.main --mode image --preset fast --input sample_data/sample.jpg --output outputs/integration_test
+
+      - name: Validate outputs
+        run: python scripts/validate_end_to_end.py outputs/integration_test

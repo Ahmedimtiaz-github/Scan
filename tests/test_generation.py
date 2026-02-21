@@ -6,7 +6,7 @@ from PIL import Image
 
 from src.prompt.prompt_generator import PromptGenerator
 from src.video.video_maker import VideoMaker
-from src.adapters.video_adapter import create_video_from_keyframes
+from src.adapters.video_adapter import create_video_from_keyframes, make_video_from_keyframes
 
 
 @pytest.fixture
@@ -89,6 +89,18 @@ class TestVideoAdapter:
             fps=10,
             transition_frames=2,
             hold_frames=2,
+        )
+        assert output is not None
+        assert os.path.exists(output)
+
+    def test_make_video_from_keyframes(self, dummy_image):
+        out_dir = os.path.join(os.path.dirname(__file__), "tmp")
+        os.makedirs(out_dir, exist_ok=True)
+        output = make_video_from_keyframes(
+            [dummy_image, dummy_image],
+            os.path.join(out_dir, "make_video.mp4"),
+            fps=10,
+            crossfade_frames=2,
         )
         assert output is not None
         assert os.path.exists(output)
