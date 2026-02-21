@@ -1,60 +1,59 @@
 # AI Room Scan & Interior Styling System (CPU-Optimized Edition)
 
-## Generation & Output Stack
+A CPU-only AI system that takes room images or video, understands layout and objects, and redesigns the room using AI—producing styled images and video.
 
-This module provides a complete pipeline for generating stylized interior design images and videos from room scans, optimized specifically for CPU execution.
+## Quick start
 
-### Features
-- **3 Prompting Modes**: Generic (style-based), Prompt-Based (user input), and Auto-Design (scene analysis).
-- **CPU-Optimized Stable Diffusion**: Uses `diffusers` with ControlNet (depth/mask) guidance.
-- **Preset Management**: Fast, Balanced, and Quality presets for performance/quality tradeoffs.
-- **Video Recomposition**: Creates smooth transitions between styled keyframes.
-- **Performance Helpers**: Includes `channels_last` memory format and `torch.compile` support.
-
-### Project Structure
-```
-ai_room_styling/
-├── src/
-│   ├── prompt/
-│   │   └── prompt_generator.py   # Mode-based prompt logic
-│   ├── generation/
-│   │   └── sd_runner.py          # SD + ControlNet pipeline
-│   ├── video/
-│   │   └── video_maker.py        # Video creation from keyframes
-│   └── optimizations.py          # CPU optimization helpers
-├── tests/
-│   └── test_generation.py        # Unit tests
-├── scene/
-│   └── frame_0001.json           # Sample scene metadata
-├── assets/
-│   └── room_sample.jpg           # Sample input image
-└── outputs/
-    └── sample_generation/        # Generated examples
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-### Installation
 ```bash
-pip install diffusers transformers accelerate controlnet_aux opencv-python-headless torch torchvision 
-OR
-pip install -r requiremwnts.txt
+python -m src.main --mode image --preset fast --input sample_data/sample.jpg --output outputs/integration_test
 ```
 
-### Usage
-```python
-from src.generation.sd_runner import generate_styled_image
+## Presets
 
-# Generate a styled image
-image, path = generate_styled_image(
-    scene_json_path="scene/frame_0001.json",
-    source_image_path="assets/room_sample.jpg",
-    preset="fast",
-    mode="auto_design"
-)
+| Preset   | Resolution | Steps | Use case        |
+|----------|------------|-------|-----------------|
+| fast     | 512×512    | 20    | CPU default     |
+| balanced | 768×768    | 25    | Better quality  |
+| quality  | 1024×1024  | 40    | Best (slow)     |
+
+## Project structure
+
+```
+src/
+├── main.py              # CLI entrypoint
+├── config.py            # Presets (Fast/Balanced/Quality)
+├── orchestrator.py      # Pipeline controller
+├── input.py             # Video frame extraction
+├── adapters/            # Perception & generation adapters
+├── depth/               # MiDaS
+├── detection/           # YOLOv8
+├── segmentation/       # SAM
+├── scene/               # Scene builder
+├── prompt/              # Prompt generator
+├── generation/          # Stable Diffusion + ControlNet
+├── video/               # Video assembly
+└── optimizations.py     # CPU helpers
 ```
 
-### Unit Tests
-Run tests using:
+## Tests
+
 ```bash
-export PYTHONPATH=$PYTHONPATH:$(pwd)
-python3 tests/test_generation.py
+pytest -q
 ```
+
+Full integration (requires models):
+
+```bash
+RUN_HEAVY=1 pytest -q -v
+```
+
+## Documentation
+
+See [docs/README.md](docs/README.md) for setup, run commands, acceptance criteria, and Colab instructions.

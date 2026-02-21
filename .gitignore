@@ -28,3 +28,7 @@ Thumbs.db
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Test artifacts
+tests/tmp/
+tests/pytest_tmp/
