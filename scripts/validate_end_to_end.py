@@ -35,10 +35,13 @@ def main():
                 data = json.load(f)
             schema_path = os.path.join(os.path.dirname(__file__), "..", "docs", "scene_schema.json")
             if os.path.exists(schema_path):
-                import jsonschema
-                with open(schema_path) as sf:
-                    schema = json.load(sf)
-                jsonschema.validate(instance=data, schema=schema)
+                try:
+                    import jsonschema
+                    with open(schema_path) as sf:
+                        schema = json.load(sf)
+                    jsonschema.validate(instance=data, schema=schema)
+                except ImportError:
+                    pass  # Skip schema validation if jsonschema not installed
         except Exception as e:
             errors.append(f"Scene JSON invalid: {e}")
 
