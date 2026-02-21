@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["frames", "preset", "mode"],
+  "properties": {
+    "preset": {"type": "string", "enum": ["fast", "balanced", "quality"]},
+    "mode": {"type": "string", "enum": ["image", "video"]},
+    "frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "source", "width", "height", "depth_path", "masks", "bboxes"],
+        "properties": {
+          "id": {"type": "string"},
+          "source": {"type": "string"},
+          "width": {"type": "integer"},
+          "height": {"type": "integer"},
+          "depth_path": {"type": "string"},
+          "masks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["mask_path", "class", "bbox"],
+              "properties": {
+                "mask_path": {"type": "string"},
+                "class": {"type": "string"},
+                "bbox": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4}
+              }
+            }
+          },
+          "bboxes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["class", "bbox"],
+              "properties": {
+                "class": {"type": "string"},
+                "bbox": {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4}
+              }
+            }
+          },
+          "extra": {"type": "object"}
+        }
+      }
+    }
+  }
+}
